@@ -80,7 +80,7 @@
             <label class="form-label">Away</label>
             <input type="number" class="form-control" placeholder="Away Odds">
           </div>
-          <div class="col-md-2">
+          <div class="col-md-3">
             <button class="btn btn-danger w-100" onclick="this.closest('.card').remove()">Remove</button>
           </div>
         </div>
@@ -97,9 +97,13 @@
         const [name, home, draw, away] = [...inputs].map(input => input.value.trim());
 
         if (name && home && draw && away) {
-          const result = prompt(`Enter result for ${name} (Home / Draw / Away):`, "Home") || "Unknown";
+          const result = prompt(`Enter current result for ${name} (Home / Draw / Away):`, "Home") || "Unknown";
+          const prev1 = prompt(`Enter first previous result for ${name} (optional):`, "") || "";
+          const prev2 = prompt(`Enter second previous result for ${name} (optional):`, "") || "";
+
           records.push({
             name, home, draw, away, result,
+            prev1, prev2,
             time: new Date().toLocaleString()
           });
         }
@@ -116,13 +120,19 @@
 
       tbody.innerHTML = records.map((r, i) => {
         if (!Object.values(r).some(val => val.toString().toLowerCase().includes(filter.toLowerCase()))) return "";
+
+        const superscript = `${toSup(r.prev1 || "")}${toSup(r.prev2 || "")}`;
+        const resultColor = getResultColor(r.result);
+
         return `
           <tr>
             <td>${r.name}</td>
             <td>${r.home}</td>
             <td>${r.draw}</td>
             <td>${r.away}</td>
-            <td>${r.result}</td>
+            <td style="color: ${resultColor}; font-weight: bold;">
+              ${r.result} <sup style="color: gray;">${superscript}</sup>
+            </td>
             <td>${r.time}</td>
             <td>
               <button class="btn btn-warning btn-sm me-1" onclick="editRecord(${i})">Edit</button>
@@ -133,11 +143,38 @@
       }).join("");
     }
 
+    function toSup(text) {
+      return text.replace(/./g, char => {
+        const superscriptMap = {
+          'a': 'ᵃ', 'b': 'ᵇ', 'c': 'ᶜ', 'd': 'ᵈ', 'e': 'ᵉ', 'f': 'ᶠ', 'g': 'ᵍ',
+          'h': 'ʰ', 'i': 'ⁱ', 'j': 'ʲ', 'k': 'ᵏ', 'l': 'ˡ', 'm': 'ᵐ', 'n': 'ⁿ',
+          'o': 'ᵒ', 'p': 'ᵖ', 'r': 'ʳ', 's': 'ˢ', 't': 'ᵗ', 'u': 'ᵘ', 'v': 'ᵛ',
+          'w': 'ʷ', 'x': 'ˣ', 'y': 'ʸ', 'z': 'ᶻ', '0': '⁰', '1': '¹', '2': '²',
+          '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
+        };
+        return superscriptMap[char.toLowerCase()] || char;
+      });
+    }
+
+    function getResultColor(result) {
+      const r = result.toLowerCase();
+      if (r.includes("home")) return "green";
+      if (r.includes("draw")) return "blue";
+      if (r.includes("away")) return "red";
+      return "gray";
+    }
+
     function editRecord(index) {
       const records = JSON.parse(localStorage.getItem("gameOdds") || "[]");
-      const newResult = prompt(`Edit result for ${records[index].name}:`, records[index].result);
+      const rec = records[index];
+      const newResult = prompt(`Edit result for ${rec.name}:`, rec.result);
+      const newPrev1 = prompt(`Edit 1st previous result for ${rec.name}:`, rec.prev1 || "") || "";
+      const newPrev2 = prompt(`Edit 2nd previous result for ${rec.name}:`, rec.prev2 || "") || "";
+
       if (newResult !== null && newResult.trim() !== "") {
-        records[index].result = newResult.trim();
+        rec.result = newResult.trim();
+        rec.prev1 = newPrev1;
+        rec.prev2 = newPrev2;
         localStorage.setItem("gameOdds", JSON.stringify(records));
         displayRecords();
       }
@@ -166,4 +203,4 @@
     addGame();
   </script>
 </body>
-                    </html>
+</html>
