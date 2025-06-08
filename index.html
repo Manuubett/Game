@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Odds Tracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <h1 class="mb-4">Game Odds Entry</h1>
+
+    <div id="gameContainer" class="mb-3"></div>
+
+    <button class="btn btn-success mb-3" onclick="addGame()">+ Add Game</button>
+    <button class="btn btn-primary mb-3 ms-2" onclick="submitAll()">Submit All</button>
+    <button class="btn btn-secondary mb-3 ms-2" onclick="clearInputs()">Clear Inputs</button>
+
+    <input type="text" class="form-control mb-4" placeholder="Search odds or team names..." oninput="filterRecords(this.value)" />
+
+    <h4>Saved Records</h4>
+    <table class="table table-bordered table-striped">
+      <thead class="table-light">
+        <tr>
+          <th>Game</th>
+          <th>Home</th>
+          <th>Draw</th>
+          <th>Away</th>
+          <th>Result</th>
+          <th>Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="savedRecords"></tbody>
+    </table>
+  </div>
+
+  <datalist id="gameNamesList"></datalist>
+
+  <script>
+    const teams = [
+      "Burnley", "Palace", "Newcastle", "Brighton", "Leeds", "Leicester", "Fulham",
+      "Manchester Reds", "Liverpool", "Sheffield U", "Tottenham", "Southampton",
+      "London Reds", "Manchester Blue", "Everton", "London Blues", "Aston V", "Wolves",
+      "West Ham", "West Brom"
+    ];
+
+    function generateMatchups() {
+      const datalist = document.getElementById("gameNamesList");
+      teams.forEach((home, i) => {
+        teams.forEach((away, j) => {
+          if (i !== j) {
+            const option = document.createElement("option");
+            option.value = `${home} vs ${away}`;
+            datalist.appendChild(option);
+          }
+        });
+      });
+    }
+
+    function addGame() {
+      const container = document.getElementById("gameContainer");
+      const div = document.createElement("div");
+      div.className = "card p-3 mb-3";
+      div.innerHTML = `
+        <div class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label">Game</label>
+            <input type="text" list="gameNamesList" class="form-control" placeholder="Game Name">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Home</label>
+            <input type="number" class="form-control" placeholder="Home Odds">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Draw</label>
+            <input type="number" class="form-control" placeholder="Draw Odds">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Away</label>
+            <input type="number" class="form-control" placeholder="Away Odds">
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-danger w-100" onclick="this.closest('.card').remove()">Remove</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    function submitAll() {
+      const games = document.querySelectorAll("#gameContainer .card");
+      const records = JSON.parse(localStorage.getItem("gameOdds") || "[]");
+
+      games.forEach(card => {
+        const inputs = card.querySelectorAll("input");
+        const [name, home, draw, away] = [...inputs].map(input => input.value.trim());
+
+        if (name && home && draw && away) {
+          const result = prompt(`Enter result for ${name} (Home / Draw / Away):`, "Home") || "Unknown";
+          records.push({
+            name, home, draw, away, result,
+            time: new Date().toLocaleString()
+          });
+        }
+      });
+
+      localStorage.setItem("gameOdds", JSON.stringify(records));
+      document.getElementById("gameContainer").innerHTML = "";
+      displayRecords();
+    }
+
+    function displayRecords(filter = "") {
+      const tbody = document.getElementById("savedRecords");
+      const records = JSON.parse(localStorage.getItem("gameOdds") || "[]");
+
+      tbody.innerHTML = records.map((r, i) => {
+        if (!Object.values(r).some(val => val.toString().toLowerCase().includes(filter.toLowerCase()))) return "";
+        return `
+          <tr>
+            <td>${r.name}</td>
+            <td>${r.home}</td>
+            <td>${r.draw}</td>
+            <td>${r.away}</td>
+            <td>${r.result}</td>
+            <td>${r.time}</td>
+            <td>
+              <button class="btn btn-warning btn-sm me-1" onclick="editRecord(${i})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteRecord(${i})">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function editRecord(index) {
+      const records = JSON.parse(localStorage.getItem("gameOdds") || "[]");
+      const newResult = prompt(`Edit result for ${records[index].name}:`, records[index].result);
+      if (newResult !== null && newResult.trim() !== "") {
+        records[index].result = newResult.trim();
+        localStorage.setItem("gameOdds", JSON.stringify(records));
+        displayRecords();
+      }
+    }
+
+    function deleteRecord(index) {
+      const records = JSON.parse(localStorage.getItem("gameOdds") || "[]");
+      if (confirm(`Delete record for ${records[index].name}?`)) {
+        records.splice(index, 1);
+        localStorage.setItem("gameOdds", JSON.stringify(records));
+        displayRecords();
+      }
+    }
+
+    function clearInputs() {
+      document.getElementById("gameContainer").innerHTML = "";
+    }
+
+    function filterRecords(value) {
+      displayRecords(value);
+    }
+
+    // Initial setup
+    generateMatchups();
+    displayRecords();
+    addGame();
+  </script>
+</body>
+                    </html>
