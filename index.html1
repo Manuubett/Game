@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdMob Test App</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      text-align: center;
+    }
+
+    header {
+      background: #1e88e5;
+      color: white;
+      padding: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin: 15px auto;
+      max-width: 400px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .ad-box {
+      margin: 20px auto;
+      padding: 20px;
+      background: #e3f2fd;
+      border: 2px dashed #1e88e5;
+      max-width: 320px;
+      border-radius: 8px;
+      font-weight: bold;
+      color: #1e88e5;
+    }
+
+    footer {
+      margin-top: 30px;
+      padding: 15px;
+      background: #222;
+      color: white;
+      font-size: 14px;
+    }
+
+    footer a {
+      color: #90caf9;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  My AdMob Test App
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Welcome 👋</h2>
+    <p>This is a simple test page for AdMob WebView (Median).</p>
+  </div>
+
+  <!-- Ad Placeholder -->
+  <div class="ad-box">
+    Ad Will Display Here
+  </div>
+
+  <div class="card">
+    <h3>Test Content</h3>
+    <p>Click around and scroll to test ad loading.</p>
+  </div>
+
+</div>
+
+<footer>
+  © 2026 My Test App <br>
+  <a href="privacy.html">Privacy Policy</a>
+</footer>
+
+</body>
+</html>
